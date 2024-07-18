@@ -54,8 +54,9 @@ Example: NonStop
 https://lore.kernel.org/git/01bd01da681a$b8d70a70$2a851f50$@nexbridge.com/[reports
 problems] when they're noticed.
 
+
 Compatible on `master` and releases
------------------------------------------
+-----------------------------------
 
 To make sure all stable builds and regular releases work for your platform the
 first time, you can make sure `master` doesn't break for your platform:
