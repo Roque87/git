@@ -15,6 +15,25 @@
 		      TEST_LOCATION(),  __VA_ARGS__)
 
 /*
+ * Run a test unless test_skip_all() has been called.  Acts like a for
+ * loop that runs at most once, with the test description between the
+ * parentheses and the test body as a statement or block after them.
+ * The description for each test should be unique.  E.g.:
+ *
+ *  for_test ("something else %d %d", arg1, arg2) {
+ *          prepare();
+ *          test_something_else(arg1, arg2);
+ *          cleanup();
+ *  }
+ */
+#define for_test(...)							\
+	for (int for_test_running_ = test__run_begin() ?		\
+		(test__run_end(0, TEST_LOCATION(), __VA_ARGS__), 0) : 1;\
+	     for_test_running_;						\
+	     test__run_end(1, TEST_LOCATION(), __VA_ARGS__),		\
+		for_test_running_ = 0)
+
+/*
  * Print a test plan, should be called before any tests. If the number
  * of tests is not known in advance test_done() will automatically
  * print a plan at the end of the test program.
