@@ -46,6 +46,9 @@ static void wait_for_pager_atexit(void)
 
 void wait_for_pager(void)
 {
+	if (old_fd1 == -1)
+		return;
+
 	finish_pager();
 	sigchain_pop_common();
 	unsetenv("GIT_PAGER_IN_USE");
