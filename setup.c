@@ -1236,6 +1236,16 @@ static int safe_directory_cb(const char *key, const char *value,
 
 		if (!git_config_pathname(&allowed, key, value)) {
 			const char *check = allowed ? allowed : value;
+			char *to_free = real_pathdup(check, 0);
+
+			if (!to_free) {
+				warning(_("safe.directory '%s' cannot be normalized"),
+					check);
+				goto next;
+			} else {
+				check = to_free;
+			}
+
 			if (ends_with(check, "/*")) {
 				size_t len = strlen(check);
 				if (!fspathncmp(check, data->path, len - 1))
@@ -1243,7 +1253,9 @@ static int safe_directory_cb(const char *key, const char *value,
 			} else if (!fspathcmp(data->path, check)) {
 				data->is_safe = 1;
 			}
+			free(to_free);
 		}
+	next:
 		if (allowed != value)
 			free(allowed);
 	}
