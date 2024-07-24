@@ -1215,7 +1215,7 @@ static int canonicalize_ceiling_entry(struct string_list_item *item,
 }
 
 struct safe_directory_data {
-	const char *path;
+	char *path;
 	int is_safe;
 };
 
@@ -1236,6 +1236,16 @@ static int safe_directory_cb(const char *key, const char *value,
 
 		if (!git_config_pathname(&allowed, key, value)) {
 			const char *check = allowed ? allowed : value;
+			char *to_free = real_pathdup(check, 0);
+
+			if (!to_free) {
+				warning(_("safe.directory '%s' cannot be normalized"),
+					check);
+				goto next;
+			} else {
+				check = to_free;
+			}
+
 			if (ends_with(check, "/*")) {
 				size_t len = strlen(check);
 				if (!fspathncmp(check, data->path, len - 1))
@@ -1243,7 +1253,9 @@ static int safe_directory_cb(const char *key, const char *value,
 			} else if (!fspathcmp(data->path, check)) {
 				data->is_safe = 1;
 			}
+			free(to_free);
 		}
+	next:
 		if (allowed != value)
 			free(allowed);
 	}
@@ -1263,9 +1275,7 @@ static int ensure_valid_ownership(const char *gitfile,
 				  const char *worktree, const char *gitdir,
 				  struct strbuf *report)
 {
-	struct safe_directory_data data = {
-		.path = worktree ? worktree : gitdir
-	};
+	struct safe_directory_data data = { 0 };
 
 	if (!git_env_bool("GIT_TEST_ASSUME_DIFFERENT_OWNER", 0) &&
 	    (!gitfile || is_path_owned_by_current_user(gitfile, report)) &&
@@ -1274,12 +1284,22 @@ static int ensure_valid_ownership(const char *gitfile,
 		return 1;
 
 	/*
+	 * normalize the data.path for comparison with normalized paths
+	 * that come from the configuration file.  The path is unsafe
+	 * if it cannot be normalized.
+	 */
+	data.path = real_pathdup(worktree ? worktree : gitdir, 0);
+	if (!data.path)
+		return 0;
+
+	/*
 	 * data.path is the "path" that identifies the repository and it is
 	 * constant regardless of what failed above. data.is_safe should be
 	 * initialized to false, and might be changed by the callback.
 	 */
 	git_protected_config(safe_directory_cb, &data);
 
+	free(data.path);
 	return data.is_safe;
 }
 
