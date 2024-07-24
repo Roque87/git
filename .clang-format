@@ -176,6 +176,7 @@ Cpp11BracedListStyle: false
 # function calls. Taken from:
 #   git grep -h '^#define [^[:space:]]*for_\?each[^[:space:]]*(' |
 #   sed "s/^#define /  - '/; s/(.*$/'/" | sort | uniq
+# Added for_test from t/unit-tests/test-lib.h manually as a special case.
 ForEachMacros:
   - 'for_each_builtin'
   - 'for_each_string_list_item'
@@ -193,6 +194,7 @@ ForEachMacros:
   - 'strintmap_for_each_entry'
   - 'strmap_for_each_entry'
   - 'strset_for_each_entry'
+  - 'for_test'
 
 # The maximum number of consecutive empty lines to keep.
 MaxEmptyLinesToKeep: 1
