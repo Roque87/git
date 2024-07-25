@@ -1,0 +1,79 @@
+import json
+import os
+
+TASKS_FILE = 'tasks.json'
+
+def load_tasks():
+    if os.path.exists(TASKS_FILE):
+        with open(TASKS_FILE, 'r') as file:
+            return json.load(file)
+    return []
+
+def save_tasks(tasks):
+    with open(TASKS_FILE, 'w') as file:
+        json.dump(tasks, file, indent=4)
+
+def add_task(tasks):
+    title = input("Título da tarefa: ")
+    description = input("Descrição da tarefa: ")
+    tasks.append({'title': title, 'description': description, 'done': False})
+    print("Tarefa adicionada com sucesso!")
+
+def view_tasks(tasks):
+    if not tasks:
+        print("Nenhuma tarefa encontrada.")
+        return
+    for index, task in enumerate(tasks):
+        status = "Concluída" if task['done'] else "Pendente"
+        print(f"{index + 1}. {task['title']} - {status}\n   {task['description']}")
+
+def update_task(tasks):
+    view_tasks(tasks)
+    task_index = int(input("Número da tarefa que deseja atualizar: ")) - 1
+    if 0 <= task_index < len(tasks):
+        tasks[task_index]['title'] = input("Novo título da tarefa: ")
+        tasks[task_index]['description'] = input("Nova descrição da tarefa: ")
+        status = input("A tarefa está concluída? (s/n): ")
+        tasks[task_index]['done'] = True if status.lower() == 's' else False
+        print("Tarefa atualizada com sucesso!")
+    else:
+        print("Número de tarefa inválido.")
+
+def remove_task(tasks):
+    view_tasks(tasks)
+    task_index = int(input("Número da tarefa que deseja remover: ")) - 1
+    if 0 <= task_index < len(tasks):
+        tasks.pop(task_index)
+        print("Tarefa removida com sucesso!")
+    else:
+        print("Número de tarefa inválido.")
+
+def main():
+    tasks = load_tasks()
+    while True:
+        print("\nGestão de Tarefas")
+        print("1. Adicionar Tarefa")
+        print("2. Visualizar Tarefas")
+        print("3. Atualizar Tarefa")
+        print("4. Remover Tarefa")
+        print("5. Sair")
+        
+        choice = input("Escolha uma opção: ")
+        
+        if choice == '1':
+            add_task(tasks)
+        elif choice == '2':
+            view_tasks(tasks)
+        elif choice == '3':
+            update_task(tasks)
+        elif choice == '4':
+            remove_task(tasks)
+        elif choice == '5':
+            save_tasks(tasks)
+            print("Saindo...")
+            break
+        else:
+            print("Opção inválida, por favor tente novamente.")
+
+if __name__ == "__main__":
+    main()
